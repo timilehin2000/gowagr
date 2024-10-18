@@ -1,4 +1,6 @@
 import {
+  IsDefined,
+  IsLowercase,
   IsNotEmpty,
   IsString,
   IsStrongPassword,
@@ -6,12 +8,25 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
-  @IsString() @IsNotEmpty() @Length(1, 14) readonly username: string;
-  @IsString() @IsNotEmpty() @Length(1, 50) readonly firstName: string;
-  @IsString() @IsNotEmpty() @Length(1, 50) readonly lastName: string;
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 14)
+  @IsLowercase()
+  readonly username: string;
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 50)
+  @IsLowercase()
+  readonly firstName: string;
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 50)
+  @IsLowercase()
+  readonly lastName: string;
   @IsString()
   @IsNotEmpty()
   @Length(6, 255)
+  @IsDefined()
   @IsStrongPassword(
     {
       minLength: 8,
