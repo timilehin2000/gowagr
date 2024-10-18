@@ -48,7 +48,7 @@ export class UserService {
     return user;
   }
 
-  async getUser(username: string): Promise<User> {
+  async getUserDetails(username: string): Promise<User> {
     const user = await this.findOneByUsername(username);
     if (!user) {
       throw new HttpException(
@@ -59,13 +59,13 @@ export class UserService {
     return user;
   }
 
-  async findOneByUsername(username: string): Promise<User | null> {
+  private async findOneByUsername(username: string): Promise<User | null> {
     return await this.userRepo.findOne({
       where: { username },
     });
   }
 
-  async findUserWithPassword(id: string): Promise<User | null> {
+  private async findUserWithPassword(id: string): Promise<User | null> {
     return this.userRepo
       .createQueryBuilder('user')
       .where('user.id = :id', { id })
@@ -73,7 +73,15 @@ export class UserService {
       .getOne();
   }
 
-  async findUserWithBalance(id: string): Promise<User | null> {
+  async findUserWithPasswordByUsername(username: string): Promise<User | null> {
+    return this.userRepo
+      .createQueryBuilder('user')
+      .where('user.username = :username', { username })
+      .addSelect('user.password')
+      .getOne();
+  }
+
+  private async findUserWithBalance(id: string): Promise<User | null> {
     return this.userRepo
       .createQueryBuilder('user')
       .where('user.id = :id', { id })
@@ -81,17 +89,17 @@ export class UserService {
       .getOne();
   }
 
-  async findOne(id: string): Promise<User | null> {
+  private async findOne(id: string): Promise<User | null> {
     return await this.userRepo.findOne({
       where: { id },
     });
   }
 
-  async findAll(): Promise<User[] | null> {
+  private async findAll(): Promise<User[] | null> {
     return await this.userRepo.find({});
   }
 
-  async delete(id: string): Promise<UpdateResult> {
+  private async delete(id: string): Promise<UpdateResult> {
     return await this.userRepo.softDelete(id);
   }
 }
