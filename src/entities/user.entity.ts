@@ -1,10 +1,29 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { Transfer as Transfer } from './transfer.entity';
+
+export class DecimalColumnTransformer {
+  to(data: number): number {
+    return data;
+  }
+  from(data: string): number {
+    return parseFloat(data);
+  }
+}
 
 @Entity()
 export class User extends BaseEntity {
-  @Column({ default: 0, select: false })
-  walletBalance: number;
+  @Column('decimal', {
+    precision: 12,
+    scale: 2,
+    default: 0.0,
+    transformer: {
+      to: (value: number) => value, // When saving to the database, keep it as a number
+      from: (value: string) => parseFloat(value), // When reading from the database, convert to a number
+    },
+    select: false,
+  })
+  balance: number;
 
   @Column({ type: 'varchar', length: 14, unique: true })
   username: string;
@@ -17,4 +36,10 @@ export class User extends BaseEntity {
 
   @Column({ type: 'varchar', length: 30 })
   lastName: string;
+
+  @OneToMany(() => Transfer, (transfer) => transfer.sender)
+  sentTransfers: Transfer[];
+
+  @OneToMany(() => Transfer, (transfer) => transfer.receiver)
+  receivedTransfers: Transfer[];
 }

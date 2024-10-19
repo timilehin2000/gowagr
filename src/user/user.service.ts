@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -9,7 +9,15 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
 
-  async register(createUserDto: CreateUserDto): Promise<User> {
+  /**
+   * Registers a new user in the system.
+   *
+   * @param {CreateUserDto} createUserDto - Data transfer object containing the details of the user to be created.
+   * @returns {Promise<Partial<User>>} - A promise that resolves to the newly created user's details, excluding the password.
+   * @throws {HttpException} - Throws an exception if the user already exists or if there is a server error.
+   */
+
+  async register(createUserDto: CreateUserDto): Promise<Partial<User>> {
     try {
       const userExists = await this.findOneByUsername(createUserDto.username);
       if (userExists) {
@@ -25,7 +33,9 @@ export class UserService {
       user.password = hashedPassword;
 
       const updatedUser = await this.userRepo.save(user);
-      return updatedUser;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userWithoutPassword } = updatedUser;
+      return userWithoutPassword;
     } catch (ex) {
       if (ex instanceof HttpException) {
         throw ex;
@@ -36,6 +46,14 @@ export class UserService {
       );
     }
   }
+
+  /**
+   * Retrieves a user along with their balance by user ID.
+   *
+   * @param {string} id - The ID of the user to retrieve.
+   * @returns {Promise<User>} - A promise that resolves to the user entity, including their balance.
+   * @throws {HttpException} - Throws an exception if the user is not found or there is a server error.
+   */
 
   async getUserWithBalance(id: string): Promise<User> {
     const user = await this.findUserWithBalance(id);
@@ -48,6 +66,14 @@ export class UserService {
     return user;
   }
 
+  /**
+   * Retrieves the details of a user by username.
+   *
+   * @param {string} username - The username of the user to retrieve.
+   * @returns {Promise<User>} - A promise that resolves to the user entity.
+   * @throws {HttpException} - Throws an exception if the user is not found or there is a server error.
+   */
+
   async getUserDetails(username: string): Promise<User> {
     const user = await this.findOneByUsername(username);
     if (!user) {
@@ -59,19 +85,26 @@ export class UserService {
     return user;
   }
 
+  /**
+   * Finds a user by their username.
+   *
+   * @param {string} username - The username of the user to find.
+   * @returns {Promise<User | null>} - A promise that resolves to the user entity if found, or null if not found.
+   * @private
+   */
+
   private async findOneByUsername(username: string): Promise<User | null> {
     return await this.userRepo.findOne({
       where: { username },
     });
   }
 
-  private async findUserWithPassword(id: string): Promise<User | null> {
-    return this.userRepo
-      .createQueryBuilder('user')
-      .where('user.id = :id', { id })
-      .addSelect('user.password')
-      .getOne();
-  }
+  /**
+   * Finds a user by their username and includes their password in the result.
+   *
+   * @param {string} username - The username of the user to find.
+   * @returns {Promise<User | null>} - A promise that resolves to the user entity with the password, or null if not found.
+   */
 
   async findUserWithPasswordByUsername(username: string): Promise<User | null> {
     return this.userRepo
@@ -81,25 +114,23 @@ export class UserService {
       .getOne();
   }
 
+  /**
+   * Finds a user by their ID and includes their balance in the result.
+   *
+   * @param {string} id - The ID of the user to find.
+   * @returns {Promise<User | null>} - A promise that resolves to the user entity with the balance, or null if not found.
+   * @private
+   */
+
   private async findUserWithBalance(id: string): Promise<User | null> {
-    return this.userRepo
-      .createQueryBuilder('user')
-      .where('user.id = :id', { id })
-      .addSelect('user.walletBalance')
-      .getOne();
-  }
-
-  private async findOne(id: string): Promise<User | null> {
-    return await this.userRepo.findOne({
-      where: { id },
-    });
-  }
-
-  private async findAll(): Promise<User[] | null> {
-    return await this.userRepo.find({});
-  }
-
-  private async delete(id: string): Promise<UpdateResult> {
-    return await this.userRepo.softDelete(id);
+    return (
+      this.userRepo
+        .createQueryBuilder('user')
+        //   .leftJoinAndSelect('user.sentTransfers', 'sentTransfers')
+        //   .leftJoinAndSelect('user.receivedTransfers', 'receivedTransfers')
+        .where('user.id = :id', { id })
+        .addSelect('user.balance')
+        .getOne()
+    );
   }
 }

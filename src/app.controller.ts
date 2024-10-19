@@ -19,6 +19,15 @@ export class AppController {
     private readonly appService: AppService,
     private authService: AuthService,
   ) {}
+
+  /**
+   * Handles the login request by authenticating the user using the LocalAuthGuard.
+   *
+   * @param {Request} req - The incoming request object containing user details.
+   * @param {Response} res - The response object used to send the access token.
+   * @returns {Promise<Response>} - A promise that resolves to a JSON response containing the access token.
+   */
+
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
   async login(@Request() req: any, @Res() res: Response) {
@@ -28,6 +37,13 @@ export class AppController {
       data: { access_token },
     });
   }
+
+  /**
+   * Handles the logout request by removing the 'Authorization' header and responding with a success message.
+   *
+   * @param {Response} res - The response object used to send the success message.
+   * @returns {Promise<Response>} - A promise that resolves to a JSON response confirming successful logout.
+   */
 
   @UseGuards(JwtAuthGuard)
   @Get('auth/logout')
