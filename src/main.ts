@@ -1,6 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as swaggerUi from 'swagger-ui-express';
+import * as fs from 'fs';
+import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +25,12 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  // Load your swagger.json file
+  const swaggerDocument = JSON.parse(fs.readFileSync('swagger.json', 'utf-8'));
+
+  // Serve Swagger UI
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
   await app.listen(3001);
 }
