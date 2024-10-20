@@ -1,4 +1,4 @@
-// import { TransferTypeEnum } from 'src/transfer/enum/transfer.enum';
+// import { TransferTypeEnum } from '../transfer/enum/transfer.enum';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { User } from './user.entity';
 import { BaseEntity } from './base.entity';

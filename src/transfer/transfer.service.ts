@@ -1,27 +1,21 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Transfer } from 'src/entities/transfer.entity';
+import { Transfer } from '../entities/transfer.entity';
 import { Connection, Repository } from 'typeorm';
 import {
   IncrementBalanceDto,
   InitiateTransferDto,
 } from './dtos/initiate-transfer.dto';
-import { User } from 'src/entities/user.entity';
+import { User } from '../entities/user.entity';
 import { GetTransfersQueryDto } from './dtos/get-transfer-query.dto';
 import { TransferTypeEnum } from './enum/transfer.enum';
-
-interface TransferQueryConditions {
-  otherPartyUsername?: string;
-  date?: string;
-  minimumAmount?: number;
-  maximumAmount?: number;
-  startDate?: string;
-  endDate?: string;
-}
+import { TransferQueryConditions } from './transfer.interface';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class TransferService {
   constructor(
+    @Inject('CACHE_MANAGER') private cacheManager: Cache,
     @InjectRepository(Transfer) private transferRepo: Repository<Transfer>,
     @InjectRepository(User) private userRepo: Repository<User>,
     private readonly connection: Connection,
@@ -93,6 +87,10 @@ export class TransferService {
       await queryRunner.manager.save(transfer);
       await queryRunner.commitTransaction();
 
+      //Clear previous sender and receiver balances from cache
+      await this.cacheManager.del(sender.id);
+      await this.cacheManager.del(receiver.id);
+
       return transfer;
     } catch (ex) {
       await queryRunner.rollbackTransaction();
@@ -133,8 +131,11 @@ export class TransferService {
       if (!user) {
         throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
       }
-      console.log(user);
       user.balance += amount;
+
+      // Clear previous balance from cache
+      await this.cacheManager.del(userId);
+
       return await this.userRepo.save(user);
     } catch (ex) {
       if (ex instanceof HttpException) {

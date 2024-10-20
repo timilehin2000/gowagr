@@ -16,7 +16,7 @@ import {
   InitiateTransferDto,
 } from './dtos/initiate-transfer.dto';
 import { Response } from 'express';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GetTransfersQueryDto } from './dtos/get-transfer-query.dto';
 
 @Controller('transfers')
