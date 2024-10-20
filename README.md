@@ -89,13 +89,13 @@ The API documentation is available in both Swagger and Postman formats:
 
 ### Swagger
 
-Swagger documentation can be accessed at:
+Swagger documentation can be accessed upon running the code at:
 
 `http://localhost:3001/api-docs`
 
 ### Postman
 
-You can run the API collection in Postman using the button below:
+You can [view](https://documenter.getpostman.com/view/22713786/2sAXxY2Th2) the API collection or run in Postman using the button below:
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/22713786-0af6db25-4e9f-4395-9ec8-7cf634e93f3a)
 
