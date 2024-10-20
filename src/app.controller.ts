@@ -54,9 +54,4 @@ export class AppController {
       message: 'Logged out successfully',
     });
   }
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
 }

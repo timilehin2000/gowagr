@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as swaggerUi from 'swagger-ui-express';
 import * as fs from 'fs';
-import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
