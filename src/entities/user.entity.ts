@@ -25,7 +25,7 @@ export class User extends BaseEntity {
   })
   balance: number;
 
-  @Column({ type: 'varchar', length: 14, unique: true })
+  @Column({ type: 'varchar', length: 14, unique: true }) // Unique index on username
   username: string;
 
   @Column({ type: 'varchar', length: 255, select: false })

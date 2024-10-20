@@ -68,7 +68,6 @@ export class UserService {
       | undefined = await this.cacheManager.get(id);
 
     if (cachedUser) {
-      console.log('User retrieved from cache');
       return cachedUser as Omit<
         User,
         'sentTransfers' | 'receivedTransfers' | 'password'
