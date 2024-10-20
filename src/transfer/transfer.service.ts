@@ -67,8 +67,6 @@ export class TransferService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      console.log('bal:', sender.balance);
-      console.log('amt:', amount);
       if (sender.balance <= amount) {
         throw new HttpException('Insufficient amount!', HttpStatus.BAD_REQUEST);
       }
