@@ -89,7 +89,7 @@ The API documentation is available in both Swagger and Postman formats:
 
 ### Swagger
 
-Swagger documentation can be accessed at:
+Swagger documentation can be accessed upon running the code at:
 
 `http://localhost:3001/api-docs`
 
