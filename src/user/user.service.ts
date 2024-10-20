@@ -1,13 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entities/user.entity';
+import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
+  constructor(
+    @Inject('CACHE_MANAGER') private cacheManager: Cache,
+    @InjectRepository(User) private userRepo: Repository<User>,
+  ) {}
 
   /**
    * Registers a new user in the system.
@@ -55,7 +59,23 @@ export class UserService {
    * @throws {HttpException} - Throws an exception if the user is not found or there is a server error.
    */
 
-  async getUserWithBalance(id: string): Promise<User> {
+  async getUserWithBalance(
+    id: string,
+  ): Promise<Omit<User, 'sentTransfers' | 'receivedTransfers' | 'password'>> {
+    // Check if the user is in the cache and the cache is not expired
+    const cachedUser:
+      | Omit<User, 'sentTransfers' | 'receivedTransfers' | 'password'>
+      | undefined = await this.cacheManager.get(id);
+
+    if (cachedUser) {
+      console.log('User retrieved from cache');
+      return cachedUser as Omit<
+        User,
+        'sentTransfers' | 'receivedTransfers' | 'password'
+      >;
+    }
+
+    // Get from DB if user not in cache
     const user = await this.findUserWithBalance(id);
     if (!user) {
       throw new HttpException(
@@ -63,6 +83,8 @@ export class UserService {
         HttpStatus.NOT_FOUND,
       );
     }
+    // Set user with balance in cache
+    await this.cacheManager.set(id, user, 30 * 60 * 1000);
     return user;
   }
 
@@ -74,7 +96,11 @@ export class UserService {
    * @throws {HttpException} - Throws an exception if the user is not found or there is a server error.
    */
 
-  async getUserDetails(username: string): Promise<User> {
+  async getUserDetails(
+    username: string,
+  ): Promise<
+    Omit<User, 'sentTransfers' | 'receivedTransfers' | 'balance' | 'password'>
+  > {
     const user = await this.findOneByUsername(username);
     if (!user) {
       throw new HttpException(
