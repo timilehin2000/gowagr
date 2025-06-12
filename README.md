@@ -44,7 +44,7 @@ Welcome to the **Money Transfer System API**! This API allows users to register,
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/ayomideajewole/money-transfer-api.git
+   git clone https://github.com/timilehin2000/money-transfer-api.git
    cd money-transfer-system-api
    ```
 
