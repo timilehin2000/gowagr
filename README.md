@@ -1,6 +1,6 @@
-# Money Transfer System API
+# Gowagr
 
-Welcome to the **Money Transfer System API**! This API allows users to register, authenticate, and initiate transfers seamlessly. It is designed for efficient money transfer, providing a robust and secure backend service.
+Welcome to the **Gowagr**! This API allows users to register, authenticate, and initiate transfers seamlessly. It is designed for efficient money transfer, providing a robust and secure backend service.
 
 ## Table of Contents
 
